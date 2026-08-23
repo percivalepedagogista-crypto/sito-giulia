@@ -226,3 +226,45 @@ document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () 
 </script>
 </body>
 </html>
+<script>
+  const form = document.getElementById('contactForm');
+  const statusMessage = document.getElementById('statusMessage');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Evita il ricaricamento della pagina
+
+    // Disabilita temporaneamente il pulsante
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Invio in corso...';
+    statusMessage.style.display = 'none';
+
+    try {
+      // Invia i dati alla Cloudflare Function che abbiamo creato
+      const response = await fetch('/api/invia-contatto', {
+        method: 'POST',
+        body: new FormData(form),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        statusMessage.style.backgroundColor = '#d4edda';
+        statusMessage.style.color = '#155724';
+        statusMessage.innerText = 'Messaggio inviato correttamente!';
+        statusMessage.style.display = 'block';
+        form.reset(); // Svuota i campi del modulo
+      } else {
+        throw new Error('Errore durante l\'invio');
+      }
+    } catch (error) {
+      statusMessage.style.backgroundColor = '#f8d7da';
+      statusMessage.style.color = '#721c24';
+      statusMessage.innerText = 'Si è verificato un errore durante l\'invio. Riprova più tardi.';
+      statusMessage.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Invia richiesta';
+    }
+  });
+</script>
